@@ -13,9 +13,72 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const saveDriveBtn = document.getElementById('save-drive-btn');
 
+    // Login Elements
+    const loginOverlay = document.getElementById('login-overlay');
+    const appContainer = document.getElementById('app-container');
+    const loginBtn = document.getElementById('login-btn');
+    const loginPassword = document.getElementById('login-password');
+    const loginError = document.getElementById('login-error');
+    const loginLoader = document.getElementById('login-loader');
+
+    let appPassword = sessionStorage.getItem('ytpro_password') || '';
     let currentFilepath = '';
     let currentData = [];
     let currentSort = { column: null, direction: 'desc' };
+
+    // Initial check
+    if (appPassword) {
+        verifyPassword(appPassword);
+    }
+
+    loginBtn.addEventListener('click', async () => {
+        const pwd = loginPassword.value.trim();
+        if (!pwd) return;
+        await verifyPassword(pwd);
+    });
+
+    loginPassword.addEventListener('keypress', async (e) => {
+        if (e.key === 'Enter') {
+            const pwd = loginPassword.value.trim();
+            if (pwd) await verifyPassword(pwd);
+        }
+    });
+
+    async function verifyPassword(pwd) {
+        loginBtn.disabled = true;
+        loginLoader.classList.remove('hidden');
+        loginBtn.querySelector('.btn-text').textContent = '確認中...';
+        loginError.classList.add('hidden');
+
+        try {
+            const res = await fetch('/api/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password: pwd })
+            });
+            
+            if (res.ok) {
+                // Success
+                appPassword = pwd;
+                sessionStorage.setItem('ytpro_password', pwd);
+                loginOverlay.classList.add('hidden');
+                appContainer.classList.remove('hidden');
+            } else {
+                // Failed
+                loginError.classList.remove('hidden');
+                sessionStorage.removeItem('ytpro_password');
+                appPassword = '';
+            }
+        } catch (e) {
+            console.error(e);
+            loginError.textContent = '通信エラーが発生しました';
+            loginError.classList.remove('hidden');
+        } finally {
+            loginBtn.disabled = false;
+            loginLoader.classList.add('hidden');
+            loginBtn.querySelector('.btn-text').textContent = 'ログイン';
+        }
+    }
 
     searchBtn.addEventListener('click', async () => {
         const keyword = keywordInput.value.trim();
@@ -37,7 +100,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 progressText.textContent = '関連キーワードを抽出中...';
                 const suggestRes = await fetch('/api/suggest', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'x-app-password': appPassword
+                    },
                     body: JSON.stringify({ keyword })
                 });
                 const suggestData = await suggestRes.json();
@@ -50,7 +116,10 @@ document.addEventListener('DOMContentLoaded', () => {
             progressText.textContent = 'YouTubeから動画データを抽出中...';
             const extractRes = await fetch('/api/extract', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'x-app-password': appPassword
+                },
                 body: JSON.stringify({ keywords: finalKeywords })
             });
             
@@ -82,8 +151,8 @@ document.addEventListener('DOMContentLoaded', () => {
     saveDriveBtn.addEventListener('click', () => {
         if (!currentFilepath) return;
         
-        // Trigger file download
-        window.location.href = `/api/download?filepath=${encodeURIComponent(currentFilepath)}`;
+        // Trigger file download with password
+        window.location.href = `/api/download?filepath=${encodeURIComponent(currentFilepath)}&pw=${encodeURIComponent(appPassword)}`;
     });
 
     function renderTable(data) {

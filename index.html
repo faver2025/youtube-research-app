@@ -14,7 +14,26 @@
     <div class="bg-gradient"></div>
     <div class="bg-mesh"></div>
 
-    <div class="container">
+    <!-- Login Overlay -->
+    <div id="login-overlay" class="login-overlay">
+        <div class="login-modal glass-panel">
+            <div class="logo" style="justify-content: center; margin-bottom: 20px;">
+                <span class="icon">🚀</span>
+                <h1>YT <span class="gradient-text">Research</span> <sup class="pro-badge">Pro</sup></h1>
+            </div>
+            <p>このツールを使用するためのパスコードを入力してください。</p>
+            <div class="input-group" style="margin: 20px 0;">
+                <input type="password" id="login-password" placeholder="パスコードを入力" autocomplete="off" style="text-align: center; font-size: 1.2rem;">
+            </div>
+            <p id="login-error" class="error-msg hidden" style="text-align: center; color: #ff6b6b; margin-bottom: 15px;">パスコードが間違っています</p>
+            <button id="login-btn" class="primary-btn" style="width: 100%;">
+                <span class="btn-text">ログイン</span>
+                <div class="loader hidden" id="login-loader"></div>
+            </button>
+        </div>
+    </div>
+
+    <div id="app-container" class="container hidden">
         <!-- Header -->
         <header>
             <div class="logo">

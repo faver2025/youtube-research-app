@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request, Header
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
@@ -11,9 +11,20 @@ from youtube_research import suggest_keywords, extract_data
 
 app = FastAPI(title="YouTube Research Web App")
 
+# Authentication Setup
+APP_PASSWORD = os.getenv("APP_PASSWORD", "ytpro")
+
+def verify_password(x_app_password: str = Header(None)):
+    if x_app_password != APP_PASSWORD:
+        raise HTTPException(status_code=401, detail="Unauthorized: Invalid password")
+    return True
+
 # Mount static files for the frontend
 os.makedirs("static", exist_ok=True)
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+class VerifyRequest(BaseModel):
+    password: str
 
 class KeywordRequest(BaseModel):
     keyword: str
@@ -28,8 +39,16 @@ class UploadRequest(BaseModel):
 def serve_index():
     return FileResponse("static/index.html")
 
+@app.post("/api/verify")
+def api_verify(req: VerifyRequest):
+    if req.password == APP_PASSWORD:
+        return {"success": True}
+    else:
+        raise HTTPException(status_code=401, detail="Invalid password")
+
 @app.post("/api/suggest")
-def api_suggest(req: KeywordRequest):
+def api_suggest(req: KeywordRequest, x_app_password: str = Header(None)):
+    verify_password(x_app_password)
     try:
         suggestions = suggest_keywords(req.keyword)
         return {"suggestions": suggestions}
@@ -37,7 +56,8 @@ def api_suggest(req: KeywordRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/extract")
-def api_extract(req: ExtractRequest):
+def api_extract(req: ExtractRequest, x_app_password: str = Header(None)):
+    verify_password(x_app_password)
     try:
         filepath, df = extract_data(req.keywords)
         if df is None:
@@ -51,7 +71,11 @@ def api_extract(req: ExtractRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/download")
-def api_download(filepath: str):
+def api_download(filepath: str, pw: str = None):
+    # For file downloads via window.location.href, we use query param instead of header
+    if pw != APP_PASSWORD:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+        
     try:
         # Prevent path traversal
         clean_path = os.path.basename(filepath)
