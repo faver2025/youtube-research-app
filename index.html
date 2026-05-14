@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Research - Premium Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <!-- Background Animated Gradient -->
+    <div class="bg-gradient"></div>
+    <div class="bg-mesh"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="logo">
+                <span class="icon">🚀</span>
+                <h1>YT Research <span>Pro</span></h1>
+            </div>
+            <p class="subtitle">AI-powered YouTube Competitor Analysis</p>
+        </header>
+
+        <!-- Search Section -->
+        <div class="glass-panel search-section">
+            <div class="input-group">
+                <input type="text" id="keyword-input" placeholder="調べたいキーワードを入力してください (例: AI副業)" autocomplete="off">
+                <button id="search-btn">
+                    <span class="btn-text">リサーチ開始</span>
+                    <div class="loader hidden" id="search-loader"></div>
+                </button>
+            </div>
+            <div class="options">
+                <label class="checkbox-container">
+                    <input type="checkbox" id="include-related" checked>
+                    <span class="checkmark"></span>
+                    関連キーワードも含めて深堀りする
+                </label>
+            </div>
+        </div>
+
+        <!-- Progress State (Hidden by default) -->
+        <div id="progress-state" class="glass-panel hidden">
+            <h3 id="progress-text">リサーチを実行中...</h3>
+            <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+            <p id="progress-subtext" class="subtext">これには数十秒かかる場合があります</p>
+        </div>
+
+        <!-- Results Section (Hidden by default) -->
+        <div id="results-section" class="hidden">
+            <div class="results-header">
+                <h2>リサーチ結果 <span class="badge" id="results-count">0件</span></h2>
+                <button id="save-drive-btn" class="secondary-btn">
+                    <span class="btn-text">📊 Excelをダウンロード</span>
+                </button>
+            </div>
+
+            <!-- Table Container -->
+            <div class="glass-panel table-container">
+                <table id="results-table">
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-sort="priority" title="クリックで並び替え">優先度 <span class="sort-icon">↕</span></th>
+                            <th>タイトル</th>
+                            <th>チャンネル</th>
+                            <th class="sortable" data-sort="views" title="クリックで並び替え">再生数 <span class="sort-icon">↕</span></th>
+                            <th class="sortable" data-sort="vs_ratio" title="クリックで並び替え">V/S比 <span class="sort-icon">↕</span></th>
+                            <th>リンク</th>
+                        </tr>
+                    </thead>
+                    <tbody id="results-body">
+                        <!-- Rows will be populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
