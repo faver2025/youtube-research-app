@@ -4,7 +4,7 @@ import json
 import argparse
 import requests
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 
 # Google API imports
@@ -42,21 +42,36 @@ def suggest_keywords(keyword):
         print(json.dumps([]))
         return []
 
-def extract_data(keywords_str, max_results=10):
+def extract_data(keywords_str, max_results=10, date_filter=None):
     """YouTube APIを使用して動画データを抽出します。"""
     youtube = get_youtube_client()
     keywords = [k.strip() for k in keywords_str.split(',') if k.strip()]
+    
+    # Calculate publishedAfter if date_filter is provided
+    published_after = None
+    if date_filter:
+        now = datetime.now(timezone.utc)
+        if date_filter == '1m':
+            published_after = (now - timedelta(days=30)).strftime('%Y-%m-%dT%H:%M:%SZ')
+        elif date_filter == '6m':
+            published_after = (now - timedelta(days=180)).strftime('%Y-%m-%dT%H:%M:%SZ')
+        elif date_filter == '1y':
+            published_after = (now - timedelta(days=365)).strftime('%Y-%m-%dT%H:%M:%SZ')
     
     all_video_data = []
     
     for kw in keywords:
         # Search videos
-        search_response = youtube.search().list(
-            q=kw,
-            part='id,snippet',
-            maxResults=max_results,
-            type='video'
-        ).execute()
+        search_kwargs = {
+            'q': kw,
+            'part': 'id,snippet',
+            'maxResults': max_results,
+            'type': 'video'
+        }
+        if published_after:
+            search_kwargs['publishedAfter'] = published_after
+            
+        search_response = youtube.search().list(**search_kwargs).execute()
         
         video_ids = []
         channel_ids = []

@@ -31,6 +31,7 @@ class KeywordRequest(BaseModel):
 
 class ExtractRequest(BaseModel):
     keywords: str # comma separated
+    date_filter: Optional[str] = None
 
 class UploadRequest(BaseModel):
     filepath: str
@@ -59,7 +60,7 @@ def api_suggest(req: KeywordRequest, x_app_password: str = Header(None)):
 def api_extract(req: ExtractRequest, x_app_password: str = Header(None)):
     verify_password(x_app_password)
     try:
-        filepath, df = extract_data(req.keywords)
+        filepath, df = extract_data(req.keywords, date_filter=req.date_filter)
         if df is None:
             raise HTTPException(status_code=404, detail="No data found")
         

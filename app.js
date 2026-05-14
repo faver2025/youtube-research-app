@@ -120,7 +120,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     'Content-Type': 'application/json',
                     'x-app-password': appPassword
                 },
-                body: JSON.stringify({ keywords: finalKeywords })
+                body: JSON.stringify({ 
+                    keywords: finalKeywords,
+                    date_filter: document.getElementById('date-filter').value
+                })
             });
             
             if (!extractRes.ok) throw new Error('Data extraction failed');

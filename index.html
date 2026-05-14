@@ -47,6 +47,12 @@
         <div class="glass-panel search-section">
             <div class="input-group">
                 <input type="text" id="keyword-input" placeholder="調べたいキーワードを入力してください (例: AI副業)" autocomplete="off">
+                <select id="date-filter" class="date-filter-select">
+                    <option value="">すべての期間</option>
+                    <option value="1m">1ヶ月以内</option>
+                    <option value="6m">半年以内</option>
+                    <option value="1y">1年以内</option>
+                </select>
                 <button id="search-btn">
                     <span class="btn-text">リサーチ開始</span>
                     <div class="loader hidden" id="search-loader"></div>
