@@ -23,7 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Reset UI
         resultsSection.classList.add('hidden');
-        driveLinkContainer.classList.add('hidden');
         searchBtn.disabled = true;
         searchLoader.classList.remove('hidden');
         document.querySelector('.btn-text').textContent = '処理中...';
